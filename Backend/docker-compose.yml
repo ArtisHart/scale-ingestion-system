@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+    restart: always
+    volumes:
+      - ./shared:/shared
+    environment:
+      - DATABASE_URL=postgresql://postgres:Machone%401@db:5432/scale_app
+      - REDIS_URL=redis://redis:6379/0
+
+  worker:
+    build: .
+    command: celery -A app.workers.celery_app worker --pool=solo --loglevel=info
+    depends_on:
+      - redis
+      - db
+    restart: always
+    volumes:
+      - ./shared:/shared
+    environment:
+      - DATABASE_URL=postgresql://postgres:Machone%401@db:5432/scale_app
+      - REDIS_URL=redis://redis:6379/0
+
+  redis:
+    image: redis:7
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: Machone@1
+      POSTGRES_DB: scale_app
+    ports:
+      - "5432:5432"
