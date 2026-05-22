@@ -76,8 +76,16 @@ export default function App() {
 
         <div className="bg-white rounded-3xl shadow p-6 space-y-4">
           <h2 className="text-2xl font-semibold">Upload CSV</h2>
-          <input type="file" className="border p-2 rounded" />
-          <button className="px-4 py-2 rounded-xl bg-black text-white">
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="border p-2 rounded"
+          />
+
+          <button
+            onClick={uploadFile}
+            className="px-4 py-2 rounded-xl bg-black text-white"
+          >
             Upload
           </button>
         </div>
