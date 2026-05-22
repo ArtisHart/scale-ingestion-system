@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: worker-deployment
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: worker
+
+  template:
+    metadata:
+      labels:
+        app: worker
+
+    spec:
+      containers:
+        - name: worker
+          image: scale-ingestion-system
+
+          command:
+            [
+              "celery",
+              "-A",
+              "app.workers.celery_app",
+              "worker",
+              "--pool=solo",
+              "--loglevel=info",
+            ]
+
+          env:
+            - name: DATABASE_URL
+              value: postgresql://postgres:Machone%401@postgres-service:5432/postgres
+
+            - name: REDIS_URL
+              value: redis://redis-service:6379/0
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /shared
+
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: shared-pvc

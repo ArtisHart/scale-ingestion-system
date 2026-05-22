@@ -7,10 +7,20 @@ from app.schemas.ingestion import IngestionResponse, IngestionCreate
 from app.services.ingestion_service import create_job, update_job_status
 from app.models.ingestion import IngestionJob
 from app.workers.tasks import process_api_job, process_csv_job
-import shutil
-import os
+from fastapi.middleware.cors import CORSMiddleware
+from app.models.job import Job
+
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173",
+    "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -33,7 +43,7 @@ def ingest_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     process_csv_job.delay(job.id, file_location)
 
-    return {"job_id": job.id, "status": "pending"}
+    return {"job_id": job.id, "status": job.status}
 
 @app.post("/ingest-api", response_model=IngestionResponse)
 def ingest_api(db: Session = Depends(get_db)):
@@ -46,3 +56,7 @@ def ingest_api(db: Session = Depends(get_db)):
 @app.get("/ingest", response_model=IngestionResponse)
 def get_job(job_id: int, db: Session = Depends(get_db)):
     return db.query(IngestionJob).get(job_id)
+
+@app.get("/jobs")
+def get_jobs(db: Session = Depends(get_db)):
+    return db.query(IngestionJob).order_by(IngestionJob.id.desc()).all()
