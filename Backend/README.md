@@ -124,3 +124,9 @@ http://localhost:8000/docs
 - Retry failed ingestion jobs
 - Charts and ingestion analytics
 - Observability using Prometheus/Grafana
+
+## Screenshots
+
+![Kubernetes](image.png)
+![Dashboard Pt1](image-1.png)
+![Dashboard Pt2](image-2.png)
